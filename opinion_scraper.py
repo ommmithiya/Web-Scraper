@@ -128,17 +128,7 @@ class OpinionScraper:
             print(f"Could not verify language: {e}")
     
     def translate_text(self, text, source='es', target='en'):
-        """
-        Translate text from source language to target language using RapidAPI
         
-        Args:
-            text (str): Text to translate
-            source (str): Source language code (default: 'es' for Spanish)
-            target (str): Target language code (default: 'en' for English)
-            
-        Returns:
-            str: Translated text or original text if translation fails
-        """
         try:
             url = "https://google-translate113.p.rapidapi.com/api/v1/translator/text"
             
@@ -175,17 +165,7 @@ class OpinionScraper:
             return text
     
     def download_image(self, image_url, filename, folder="output"):
-        """
-        Download an image from URL and save it locally
         
-        Args:
-            image_url (str): URL of the image
-            filename (str): Name to save the image as
-            folder (str): Folder to save images in
-        
-        Returns:
-            str: Path to saved image or None
-        """
         try:
             if not os.path.exists(folder):
                 os.makedirs(folder)
@@ -202,15 +182,7 @@ class OpinionScraper:
             return None
     
     def scrape_full_article(self, url):
-        """
-        Navigate to article page and extract full content + metadata
-        
-        Args:
-            url (str): Article URL
-            
-        Returns:
-            dict: Article content including title, author, full text and images
-        """
+     
         article_content = {
             'title': 'N/A',
             'author': 'N/A',
@@ -298,14 +270,7 @@ class OpinionScraper:
         return article_content
     
     def scrape_opinion_section(self, max_articles=5):  # Scrape first 5 articles
-        """
-        Scrape articles from Opinion section with deep content extraction
-        
-        Args:
-            max_articles (int): Maximum number of articles to scrape deeply (default: 5)
-        
-        Note: Clicks into each article to extract full content.
-        """
+
         try:
             opinion_url = "https://elpais.com/opinion/"
             print(f"\nNavigating to Opinion section...")
@@ -364,11 +329,7 @@ class OpinionScraper:
                     for link in links:
                         url = link.get_attribute("href")
                         link_text = link.text.strip()
-                        
-                        # Only accept URLs that look like actual articles:
-                        # - Must contain /opinion/
-                        # - Must have a date pattern /YYYY-MM-DD/ OR end with .html
-                        # - Must NOT be a category page (ending with /)
+                       
                         if url and url.startswith("http") and "/opinion/" in url:
                             # Check if it's an actual article (has date or .html)
                             import re
@@ -457,7 +418,7 @@ class OpinionScraper:
             traceback.print_exc()
     
     def save_to_json(self, filename="opinion_articles.json", folder="output"):
-        """Save scraped articles to JSON file"""
+
         try:
             if not os.path.exists(folder):
                 os.makedirs(folder)
@@ -470,7 +431,7 @@ class OpinionScraper:
             print(f"\nError saving to JSON: {e}")
     
     def save_to_text(self, filename="opinion_articles.txt", folder="output"):
-        """Save scraped articles to text file"""
+     
         try:
             if not os.path.exists(folder):
                 os.makedirs(folder)
@@ -516,7 +477,7 @@ class OpinionScraper:
             print(f"Error saving to text file: {e}")
     
     def analyze_word_frequency(self):
-        """Analyze word frequency in translated titles"""
+ 
         # Combine all translated titles
         all_titles = " ".join([article['title_en'] for article in self.articles_data])
         
@@ -583,7 +544,7 @@ class OpinionScraper:
                 
                 f.write("\n" + "="*80 + "\n")
             
-            print(f"✓ Word frequency analysis saved to {analysis_filepath}")
+            print(f" Word frequency analysis saved to {analysis_filepath}")
             
             # Print analysis to console
             print("\n" + "="*80)

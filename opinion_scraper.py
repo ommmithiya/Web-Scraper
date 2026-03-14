@@ -73,56 +73,61 @@ class OpinionScraper:
             raise
     
     def accept_cookies(self):
-        """Handle cookie consent banner"""
-        print("Looking for cookie consent banner...")
         
-        cookie_selectors = [
-            "//button[contains(., 'Aceptar')]",
-            "//button[contains(., 'ACEPTAR')]",
-            "//button[contains(@id, 'accept')]",
-            "//button[contains(@id, 'cookie')]",
-            "button[id*='accept']",
-            "button[class*='accept']",
-            ".didomi-button",
-            "#didomi-notice-agree-button"
-        ]
+        cookie_selector = "//button[contains(., 'Aceptar')]"
         
-        for selector in cookie_selectors:
-            try:
-                if selector.startswith("//"):
-                    button = WebDriverWait(self.driver, 3).until(
-                        EC.element_to_be_clickable((By.XPATH, selector))
-                    )
-                else:
-                    button = WebDriverWait(self.driver, 3).until(
-                        EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
-                    )
-                
-                button.click()
-                print(f"Found cookie button using selector: {selector}")
-                time.sleep(1)
-                print("Cookie consent accepted")
-                return
-            except:
-                continue
-        
-        print("No cookie banner found (or already accepted)")
+        try:
+            button = WebDriverWait(self.driver, 3).until(
+                EC.element_to_be_clickable((By.XPATH, cookie_selector))
+            )
+            button.click()
+            print(f"Found cookie button using selector: {cookie_selector}")
+            time.sleep(1)
+            print("Cookie consent accepted")
+        except:
+            print("cookie already accepted)")
     
     def verify_spanish_language(self):
         """Verify that the website is displaying content in Spanish"""
         try:
-            html_lang = self.driver.find_element(By.TAG_NAME, "html").get_attribute("lang")
+            html_lang = self.driver.find_element(By.TAG_NAME, "html").get_attribute("lan")
             page_text = self.driver.find_element(By.TAG_NAME, "body").text.lower()
             
-            spanish_keywords = ["opinión", "noticias", "portada", "últimas"]
-            spanish_detected = any(keyword in page_text for keyword in spanish_keywords)
+            # Check 1: HTML lang attribute
+            lang_is_spanish = html_lang and html_lang.startswith('es')
+            
+            # Check 2: Common Spanish words (articles, prepositions, conjunctions)
+            common_words = ['el ', 'la ', 'los ', 'las ', 'de ', 'en ', 'que ', 'por ', 'para ', 'con ']
+            common_words_count = sum(1 for word in common_words if word in page_text)
+            
+            # Check 3: Spanish-specific characters
+            spanish_chars = ['á', 'é', 'í', 'ó', 'ú', 'ñ', '¿', '¡']
+            has_spanish_chars = any(char in page_text for char in spanish_chars)
+            
+            # Check 4: Specific content keywords
+            content_keywords = ["opinión", "noticias", "portada", "últimas", "artículo"]
+            keywords_found = [k for k in content_keywords if k in page_text]
             
             print(f"Website language: {html_lang}")
+            print(f"  ✓ Lang attribute: {'Spanish (es)' if lang_is_spanish else 'Not Spanish'}")
+            print(f"  ✓ Common Spanish words found: {common_words_count}/10")
+            print(f"  ✓ Spanish characters: {'Yes' if has_spanish_chars else 'No'}")
             
-            if spanish_detected:
-                print(f"Spanish content detected: {', '.join([k for k in spanish_keywords if k in page_text])}")
+            if keywords_found:
+                print(f"  ✓ Content keywords: {', '.join(keywords_found)}")
+            
+            # Consider Spanish verified if at least 2 checks pass
+            checks_passed = sum([
+                lang_is_spanish,
+                common_words_count >= 5,
+                has_spanish_chars,
+                len(keywords_found) >= 2
+            ])
+            
+            if checks_passed >= 2:
+                print("✓ Spanish language verified")
             else:
-                print("Warning: Spanish keywords not detected in page content")
+                print("⚠ Warning: Language verification inconclusive")
                 
         except Exception as e:
             print(f"Could not verify language: {e}")
